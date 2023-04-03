@@ -1,4 +1,5 @@
-import 'package:bloc_state_management/Colour_Bloc.dart';
+// ignore_for_file: prefer_const_constructors
+import 'package:bloc_state_management/bloc/color_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,46 +17,90 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: BlocProvider(
-          create: (_) => ChangeColourCubit(true), child: const ColorScreen()),
+      home:
+          BlocProvider(create: (_) => ColorBloc(), child: const ColorScreen()),
     );
   }
 }
 
-class ColorScreen extends StatelessWidget {
+class ColorScreen extends StatefulWidget {
   const ColorScreen({super.key});
+
+  @override
+  State<ColorScreen> createState() => _ColorScreenState();
+}
+
+class _ColorScreenState extends State<ColorScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    
+    context.read<ColorBloc>().add(InitialEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('colorz'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black, // Background color
-                ),
-                child: Text('blue'),
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              ElevatedButton(
-                onPressed: null, child: Text('red'),
-                style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white, // Background color
-  ),
-                ),
-            ],
-          ),
+          BlocConsumer<ColorBloc, ColorState>(listener: (context, state) {
+            print(state);
+          }, builder: (context, state) {
+            if (state is ColorUpdateState) {
+              return Column(
+                children: [
+                  Container(
+                    width: 200,
+                    height: 200,
+                    color: state.initialState == true ? Colors.blue : Colors.red,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () =>
+                            context.read<ColorBloc>().add(ColorToBlue()),
+                        child: Container(
+                          width: 50,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                          ),
+                          child: Center(child: Text('blue')),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      GestureDetector(
+                        onTap: () =>
+                            context.read<ColorBloc>().add(ColorToRed()),
+                        child: Container(
+                          width: 50,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                          ),
+                          child: Center(child: Text('red')),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            } else {
+              return Container();
+            }
+          }),
         ],
       ),
     );
